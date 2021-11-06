@@ -1,14 +1,15 @@
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Terminal {
     Parser parser;
-    private String path ;
-
-    public Terminal(){
-        this.path = System.getProperty("user.dir");
-    }
+    private String path = System.getProperty("user.dir");
 
     //1 mark
     public void echo(String e){
@@ -83,7 +84,7 @@ public class Terminal {
             }
         }
     }
-    //تنازلي
+
     public void lsr(){
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
@@ -102,72 +103,8 @@ public class Terminal {
 
     }
 
-    private int countSpaces(String s){
-        int spaces=0;
-        for (int i=0;i<s.length();i++){
-            if (s.charAt(i)==' ')spaces++;
-        }
-        return spaces;
-    }
 
-    public void mkdir(String s) throws IOException {
-        //ahmed.txt ahned.cpp ah.pdf
-//        int spaces=0;
-//        for (int i=0;i<s.length();i++){
-//            if (s.charAt(i)==' ')spaces++;
-//        }
-        int spaces = countSpaces(s);
-        int i=0;
-        for (int j=0;j<=spaces;j++){
-            String sub="";
-            while (s.charAt(i)!=' '){
-                sub+=s.charAt(i);
-                i++;
-                if(i==s.length())break;
-            }
-            i++;
-
-            File newFile = new File(path+"\\"+sub);
-            if(newFile.createNewFile()){
-//                echo(path+"\\"+sub);
-                echo(sub + " created");
-            }else{
-//                echo(path+"\\"+sub);
-                echo(sub + " is already exist");
-            }
-        }
-    }
-
-    public void rmdir(String s) throws IOException {
-        //rmdir ahmed.txt Sayed.txt
-        int spaces = countSpaces(s);
-        int i=0;
-        for (int j=0;j<=spaces;j++){
-            String sub="";
-            while (s.charAt(i)!=' '){
-                sub+=s.charAt(i);
-                i++;
-                if(i==s.length())break;
-            }
-            i++;
-            File newFile = new File(path+"\\"+sub);
-
-            if(newFile.exists()){
-                if(newFile.length()==0){
-                    echo(sub + " is Empty not allowed remove it with this command");
-                }else{
-                    newFile.delete();
-                    echo(sub + " deleted successfully");
-                }
-            }else{
-                echo(sub + " not exist!");
-            }
-
-        }
-
-    }
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Terminal T = new Terminal();
         Scanner input = new Scanner(System.in);
         String options="";
@@ -190,9 +127,10 @@ public class Terminal {
                     cdArr[1]=".";
                     T.cd(cdArr);
                     break;
-//                case "exit":
-//                case "EXIT":
-//                    break;
+
+                case "exit":
+                case "EXIT":
+                    break;
                 case "ls":
                 case "LS":
                     T.ls();
@@ -201,31 +139,15 @@ public class Terminal {
                 case "LS -R":
                     T.lsr();
                     break;
+
                 default:
-                    //cd ahmed
-                    if(options.charAt(0)=='c' && options.charAt(1)== 'd' && options.charAt(2)== ' '){
-                        String p;
-                        p=options.substring(3);
-                        String[] arr = new String[1];
-                        arr[0] = p;
-                        T.cd(arr);
-                        break;
-                    }else if (options.equals("exit") || options.equals("EXIT")){
-                        break;
-                    }else if(options.charAt(0)=='m' && options.charAt(1)=='k' &options.charAt(2)=='d'){
-                        String create = options.substring(6,options.length());
-                        T.mkdir(create);
-                    }
-                    else if(options.charAt(0)=='r' && options.charAt(1)=='m' &options.charAt(2)=='d'){
-                        String delete = options.substring(6,options.length());
-                        T.rmdir(delete);
-                    }
-                    else{
-                        T.echo("invalid command!");
-                    }
-
-                    }
-
+                    String p;
+                    p=options.substring(3);
+                    String[] arr = new String[1];
+                    arr[0] = p;
+                    T.cd(arr);
+                    break;
+            }
         }
 
 //        Terminal T = new Terminal();
