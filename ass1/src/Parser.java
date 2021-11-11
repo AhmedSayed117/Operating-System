@@ -11,7 +11,6 @@ class Parser {
     }
 
     public String[] getArgs(){
-
         return args;
     }
 }

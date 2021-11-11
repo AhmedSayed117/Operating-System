@@ -1,5 +1,6 @@
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Terminal {
@@ -9,12 +10,10 @@ public class Terminal {
     public Terminal(){
         this.path = System.getProperty("user.dir");
     }
-
     //1 mark
     public void echo(String e){
         System.out.println(e);
     }
-
     //1 mark
     int c=0;
     public String pwd(){
@@ -69,7 +68,6 @@ public class Terminal {
         return path;
 //        path = System.getProperty("user.home");
     }
-
     //تصاعدي
     public void ls(){
         File folder = new File(path);
@@ -96,7 +94,6 @@ public class Terminal {
             }
         }
     }
-
 
     public void chooseCommandAction(){
 
@@ -126,14 +123,31 @@ public class Terminal {
                 if(i==s.length())break;
             }
             i++;
-
-            File newFile = new File(path+"\\"+sub);
-            if(newFile.createNewFile()){
+            boolean check = false;
+            for (int k =0;k<sub.length();k++){
+                if (sub.charAt(k)=='.'){
+                    check = true;
+                    break;
+                }
+            }
+            File newFile = null;
+            if(check){
+                 newFile = new File(path+"\\"+sub);
+                if(newFile.createNewFile()){
 //                echo(path+"\\"+sub);
-                echo(sub + " created");
+                    echo(sub + " created");
+                }else{
+//                echo(path+"\\"+sub);
+                    echo(sub + " is already exist");
+                }
             }else{
-//                echo(path+"\\"+sub);
-                echo(sub + " is already exist");
+                if (new File(path + "\\" +sub).exists()){
+                    echo(sub +" is already exist");
+                }else{
+                    Files.createDirectories(Paths.get(path +"\\"+sub));
+                    echo(sub + " is created");
+                }
+
             }
         }
     }
@@ -150,21 +164,123 @@ public class Terminal {
                 if(i==s.length())break;
             }
             i++;
-            File newFile = new File(path+"\\"+sub);
 
-            if(newFile.exists()){
-                if(newFile.length()==0){
-                    echo(sub + " is Empty not allowed remove it with this command");
-                }else{
-                    newFile.delete();
-                    echo(sub + " deleted successfully");
+            boolean check = false;
+            for (int k =0;k<sub.length();k++){
+                if (sub.charAt(k)=='.'){
+                    check = true;
+                    break;
                 }
-            }else{
+            }
+            File newFile = null;
+            if(check){
+                newFile = new File(path+"\\"+sub);
+                if(newFile.exists()){
+                    if(newFile.length()==0){
+                        echo(sub + " is Empty not allowed remove it with this command");
+                    }else{
+                        newFile.delete();
+                        echo(sub + " deleted successfully");
+                    }
+                }
+            }else if(!check){
+                File directory = new File(path+"\\"+sub);
+                if (directory.length()==0){
+                    boolean result = directory.delete();
+                    if(result) {
+                        echo(sub+" is Deleted");
+                    }
+                    else {
+                        echo(sub+" not empty to delete");
+                    }
+                }
+
+            }
+            else{
                 echo(sub + " not exist!");
             }
 
         }
 
+    }
+
+    public void touch(String paths) throws IOException {
+        //ahmed\\text.txt
+        int i=paths.length()-1;
+        StringBuilder file = new StringBuilder();
+
+        while(paths.charAt(i)!='\\'){
+            file.append(paths.charAt(i));
+            paths = paths.substring(0,i);
+            i--;
+        }//text.txt
+        file.reverse();
+        boolean check = false;
+        for (int k =0;k<file.length();k++){
+            if (file.charAt(k)=='.'){
+                check = true;
+                break;
+            }
+
+        }
+        File obj = new File(paths);
+        if(obj.isDirectory() && check){
+            if(new File(String.valueOf(paths+file)).exists()){
+                echo("this file already exists before");
+            }else {
+                File created = new File(paths+file);
+                created.createNewFile();
+                echo(file + " is created");
+            }
+        }else if(!check){
+            echo("Enter valid File (Ex. newfile.Extension)");
+        }
+        else{
+            echo("invalid path!");
+        }
+
+    }
+
+    public void cp(File source , File dest) throws IOException {
+        File f1 = new File(path +"\\"+source),f2 = new File(path+"\\"+dest);
+        if(f1.exists() && f2.exists()){
+            FileInputStream sor = new FileInputStream(path +"\\"+source);
+            FileOutputStream des = new FileOutputStream(path+"\\"+dest);
+            int i=0;
+            String content="";
+            while ((i=sor.read())!=-1){
+                content+=(char)i;
+            }
+            sor.close();
+            byte[] cons = content.getBytes();
+            des.write(cons);
+            des.flush();
+            des.close();
+            echo(source +" copied into " + dest);
+        }else{
+            if(!f1.exists()){
+                echo(source + " not exist");
+            }if(!f2.exists()){
+                echo(dest + " not exist");
+            }
+        }
+
+    }
+    //بتضرب الوسخه
+    public void cpr(File source , File dest) throws IOException {
+        File src = new File(path +"\\"+source);
+        File des = new File(path+"\\"+dest);
+
+        File[] listOfFiles = src.listFiles();
+
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                File copy = new File(path+"\\"+des +"\\" +listOfFiles[i].getName());
+                copy.createNewFile();
+            } else if (listOfFiles[i].isDirectory()) {
+
+            }
+        }
     }
 
     public static void main(String[] args) throws IOException {
@@ -190,9 +306,6 @@ public class Terminal {
                     cdArr[1]=".";
                     T.cd(cdArr);
                     break;
-//                case "exit":
-//                case "EXIT":
-//                    break;
                 case "ls":
                 case "LS":
                     T.ls();
@@ -212,13 +325,45 @@ public class Terminal {
                         break;
                     }else if (options.equals("exit") || options.equals("EXIT")){
                         break;
-                    }else if(options.charAt(0)=='m' && options.charAt(1)=='k' &options.charAt(2)=='d'){
+                    }else if(options.charAt(0)=='m' && options.charAt(1)=='k' && options.charAt(2)=='d'){
                         String create = options.substring(6,options.length());
                         T.mkdir(create);
                     }
-                    else if(options.charAt(0)=='r' && options.charAt(1)=='m' &options.charAt(2)=='d'){
+                    else if(options.charAt(0)=='r' && options.charAt(1)=='m' && options.charAt(2)=='d'){
                         String delete = options.substring(6,options.length());
                         T.rmdir(delete);
+                    }
+                    else if(options.charAt(0)=='t' && options.charAt(1)=='o' && options.charAt(2)=='u'){
+                        //touch ahmed\\text.txt
+                        String path = options.substring(6,options.length());
+                        T.touch(path);
+                        //cp -r ahmed sayed
+                    }else if(options.charAt(0)=='c' && options.charAt(1)=='p' && options.charAt(2)==' ' && options.charAt(3) =='-'){
+                        String p = options.substring(6,options.length());
+                        String f = "";
+                        int i=0;
+                        while (p.charAt(i)!=' '){
+                            f+=p.charAt(i);
+                            i++;
+                        }
+                        p=p.substring(i+1,p.length());
+                        File f1 = new File(f);
+                        File f2 = new File(p);
+                        T.cpr(f1,f2);
+                    }
+                    //cp ahmed.txt sayed.txt
+                    else if(options.charAt(0)=='c' && options.charAt(1)=='p' && options.charAt(2)==' '){
+                        String p = options.substring(3,options.length());
+                        String f = "";
+                        int i=0;
+                        while (p.charAt(i)!=' '){
+                            f+=p.charAt(i);
+                            i++;
+                        }
+                        p=p.substring(i+1,p.length());
+                        File f1 = new File(f);
+                        File f2 = new File(p);
+                        T.cp(f1,f2);
                     }
                     else{
                         T.echo("invalid command!");
