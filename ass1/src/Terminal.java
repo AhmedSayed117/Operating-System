@@ -5,8 +5,8 @@ import java.util.*;
 
 public class Terminal {
     Parser parser;
-    public int checkCount=0;
-    public int checkCount2=0;
+    public int checkCount = 0;
+    public int checkCount2 = 0;
     private String path ;
 
     public Terminal(){
@@ -44,8 +44,9 @@ public class Terminal {
 
     public void cd(String[] args){
         String p = getPath();
-        if((args[0].equals(".")) && args[1].equals(".")){
+        if((args[0].equals(".."))){
 //            System.out.println(p.length());
+            System.out.println("ss");
             int l = p.length();
             while ((l)>=0){
                 if(p.charAt(l-1)!='\\'){
@@ -57,8 +58,9 @@ public class Terminal {
                 }
             }
             System.out.println(p);
-            setPath(p);
+            setPath(p);//cd..
         }else{
+            System.out.println("ssaaa");
              setPath(p+='\\'+args[0]);
              System.out.println(p);
         }
@@ -113,10 +115,6 @@ public class Terminal {
         }
     }
 
-    public void chooseCommandAction(){
-
-    }
-
     private int countSpaces(String s){
         int spaces=0;
         for (int i=0;i<s.length();i++){
@@ -165,7 +163,6 @@ public class Terminal {
                     Files.createDirectories(Paths.get(path +"\\"+sub));
                     echo(sub + " is created");
                 }
-
             }
         }
     }
@@ -284,20 +281,47 @@ public class Terminal {
         }
 
     }
-    //بتضرب الوسخه
+
+    int v=0;String shared="";
     public void cpr(File source , File dest) throws IOException {
-        File src = new File(path +"\\"+source);
-        File des = new File(path+"\\"+dest);
+        File src;
+        File des;
+        if (v!=0){
+            src= new File(String.valueOf(source));
+            v=0;
+            des = new File(String.valueOf(dest) + "\\"+shared);
+        }else {
+            src = new File(path +"\\"+source);
+            des = new File(path +"\\"+dest);
+        }
 
         File[] listOfFiles = src.listFiles();
 
-        for (int i = 0; i < listOfFiles.length; i++) {
-            if (listOfFiles[i].isFile()) {
-                File copy = new File(path+"\\"+des +"\\" +listOfFiles[i].getName());
-                copy.createNewFile();
-            } else if (listOfFiles[i].isDirectory()) {
+               for (int i = 0; i < listOfFiles.length; i++) {
+                   if (listOfFiles[i].isFile()){
+                       File f = new File( src +"\\" +listOfFiles[i].getName());
+                       FileInputStream sor = new FileInputStream(f);
+                       int k=0;
+                       String content="";
+                       while ((k=sor.read())!=-1){
+                           content+=(char)k;
+                       }
+                       File o =new File( des + "\\" +listOfFiles[i].getName());
+                       o.createNewFile();
+                       FileOutputStream dess = new FileOutputStream(o);
+                       dess.write(content.getBytes());
+                       dess.flush();
+                       dess.close();
+                   }
+                   else if (listOfFiles[i].isDirectory()){
 
-            }
+                       File f = new File(  des +"\\" +listOfFiles[i].getName());
+                       f.mkdir();
+                       File srrc = new File(src+"\\" + listOfFiles[i].getName());
+                       v++;
+                       shared= listOfFiles[i].getName();
+                       cpr(srrc,des);
+                   }
         }
     }
 
@@ -401,178 +425,178 @@ public class Terminal {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        Terminal T = new Terminal();
+    public void chooseCommandAction() throws IOException {
         Scanner input = new Scanner(System.in);
+        Terminal T = new Terminal();
         String options="";
         while (!(options.equals("exit"))){
+            parser = new Parser();
             System.out.print("> ");
             options = input.nextLine();
-            switch (options){
-                case "pwd":
-                case "PWD":
-                    T.echo(T.pwd());
-                    break;
-                case "cd":
-                case "CD":
-                    T.echo(T.cd());
-                    break;
-                case "cd..":
-                case "CD..":
-                    String[] cdArr = new String[2];
-                    cdArr[0]=".";
-                    cdArr[1]=".";
-                    T.cd(cdArr);
-                    break;
-                case "ls":
-                case "LS":
-                    T.ls();
-                    break;
-                case "ls -r":
-                case "LS -R":
-                    T.lsr();
-                    break;
-                default:
-//                    T.write(T,"echo","test.txt","sfhsdfgjhsdfgsdhgjhsdfgj");
-                    //cat countSpace
-                    //cd ahmed
-                    if(options.charAt(0)=='c' && options.charAt(1)== 'd' && options.charAt(2)== ' '){
-                        String p;
-                        p=options.substring(3);
-                        String[] arr = new String[1];
-                        arr[0] = p;
-                        T.cd(arr);
+            parser.parse(options);
+            String command =parser.getCommandName();
+            String[] args =parser.getArgs();
+            /////////////////////////////////////
+            if(parser.parse(options)){
+                switch (command){
+                    case "echo"://echo ahmed sayed hassan > file
+                        if (Arrays.toString(args).contains(">") && args[args.length-2].equals(">")){
+                            String sub = "";
+                            System.out.println(args[args.length-2]);
+                            for (int i=0;i<args.length-2;i++){
+                                sub+=args[i];
+                                if (i!=args.length-3){
+                                    sub+=" ";
+                                }else if(i==args.length-2){
+                                    break;
+                                }
+                            }
+                            System.out.println(sub);
+                            T.write(T, "echo",args[args.length-1] , sub);
+
+                        }else if (Arrays.toString(args).contains(">>") && args[args.length-2].equals(">>")){
+                            String sub = "";
+                            for (int i=0;i<args.length-2;i++){
+                                sub+=args[i];
+                                if (i!=args.length-3){
+                                    sub+=" ";
+                                }else if(i==args.length-2){
+                                    break;
+                                }
+                            }
+                            T.writeAppend(T, "echo",args[args.length-1] , sub);
+                        }
+                        String e = "";
+                        for (int i=0;i<args.length;i++){
+                            e+=args[i];
+                        }
+                        T.echo(e);
                         break;
-                    }else if (options.equals("exit") || options.equals("EXIT")){
+                    case "pwd"://done
+                        if (Arrays.toString(args).contains(">") && args[0].equals(">")){
+                            T.write(T, "pwd", args[1], "");
+                        }else if(Arrays.toString(args).contains(">>") && args[0].equals(">>")){
+                            T.writeAppend(T, "pwd", args[1], "");
+                        }else{
+                            T.echo(T.pwd());
+                        }
                         break;
-                    }else if(options.charAt(0)=='m' && options.charAt(1)=='k' && options.charAt(2)=='d'){
-                        String create = options.substring(6,options.length());
-                        T.mkdir(create);
-                    }
-                    else if(options.charAt(0)=='r' && options.charAt(1)=='m' && options.charAt(2)=='d'){
-                        String delete = options.substring(6,options.length());
+                    case "cd"://done
+                        if(args.length!=0 && args[0].equals("..")){
+                            String[] array =new String[1];
+                            array[0] = "..";
+                            T.cd(array);
+                        }else{
+                            if(args.length==0){
+                                T.echo(T.cd());
+                            }else {
+                                String[] array =new String[1];
+                                String p =Arrays.toString(args);
+                                p =p.substring(1,p.length()-1);
+                                array[0] = p;
+                                T.cd(array);
+                            }
+                        }
+                        break;
+                    case "ls":
+                        if(args.length!=0 && args[0].equals("-r")){
+                            T.lsr();
+                        }else if(args.length==0){
+                            T.ls();
+                        }else if(Arrays.toString(args).contains(">") && args[0].equals(">")){
+                            T.write(T, "ls", args[1], "");
+                        }else if(Arrays.toString(args).contains(">>") && args[0].equals(">>")){
+                            T.writeAppend(T, "ls", args[1], "");
+                        }
+                        break;
+                    case "exit":
+                        return;
+                    case "mkdir":
+                        String p ="";
+                        for (int i=0;i<args.length;i++){
+                            p+=args[i];
+                            if (i!=args.length-1){
+                                p+=" ";
+                            }else if(i==args.length-1){
+                                break;
+                            }
+                        }
+                        System.out.println(p);
+                        T.mkdir(p);
+                        break;
+                    case "rmdir":
+                        String delete ="";
+                        for (int i=0;i<args.length;i++){
+                            delete+=args[i];
+                            if (i!=args.length-1){
+                                delete+=" ";
+                            }else if(i==args.length-1){
+                                break;
+                            }
+                        }
+                        System.out.println(delete);
                         T.rmdir(delete);
-                    }
-                    else if(options.charAt(0)=='t' && options.charAt(1)=='o' && options.charAt(2)=='u'){
-                        //touch ahmed\\text.txt
-                        String path = options.substring(6,options.length());
-                        T.touch(path);
-                        //cp -r ahmed sayed
-                    }else if(options.charAt(0)=='c' && options.charAt(1)=='p' && options.charAt(2)==' ' && options.charAt(3) =='-'){
-                        String p = options.substring(6,options.length());
-                        String f = "";
-                        int i=0;
-                        while (p.charAt(i)!=' '){
-                            f+=p.charAt(i);
-                            i++;
-                        }
-                        p=p.substring(i+1,p.length());
-                        File f1 = new File(f);
-                        File f2 = new File(p);
-                        T.cpr(f1,f2);
-                    }
-                    //cp ahmed.txt sayed.txt
-                    else if(options.charAt(0)=='c' && options.charAt(1)=='p' && options.charAt(2)==' '){
-                        String p = options.substring(3,options.length());
-                        String f = "";
-                        int i=0;
-                        while (p.charAt(i)!=' '){
-                            f+=p.charAt(i);
-                            i++;
-                        }
-                        p=p.substring(i+1,p.length());
-                        File f1 = new File(f);
-                        File f2 = new File(p);
-                        T.cp(f1,f2);
-                    }//rm ahmed.txt
-                    else if(options.charAt(0)=='r' && options.charAt(1)=='m' && options.charAt(2)==' '){
-                        String s = options.substring(3);
-                        T.rm(s);
-                    }//cat ahmed
-                    else if(options.charAt(0)=='c' && options.charAt(1)=='a' && options.charAt(2)=='t'){
-                        String ch = options.substring(4);
-                        int countSpace = 0;String str="";
-                        for (int i=0;i<ch.length();i++){
-                            if (ch.charAt(i)==' ') countSpace++;
-                        }
-                        if(countSpace==0){
-                            T.cat(ch);
-                        }//cat ahmed sayed
-                        else{
-                            int i=0;String str1="",str2="";
-                            while (ch.charAt(i)!=' '){
-                                str1+=ch.charAt(i);
-                                i++;
-                            }i++;
-                            while (ch.charAt(i)!=' '){
-                                str2+=ch.charAt(i);
-                                i++;
-                                if(i==ch.length())break;
-                            }
-                            T.cat(str1,str2);
-                        }
-                        //pwd > file
-                        //ls > file
-                        //echo ahmed > file
-                        //ahmed sayed > file
-                    }else if(options.contains(">")){
-                        int index = options.indexOf('>');
-                        if(options.charAt(index+1)=='>'){
-                            if(options.contains("pwd")){
-                                String sub = options.substring(7);
-                                T.writeAppend(T,"pwd",sub,"");
-                            }
-                            else if(options.contains("ls")){
-                                String sub = options.substring(6);
-                                T.writeAppend(T,"ls",sub,"");
-                            }
-                            else if(options.contains("echo")){
-                                options=options.substring(5);
-                                String str="";
-                                int i=0;
-                                for (;options.charAt(i)!='>' && options.charAt(i+1)!='>' && i!=options.length()-1 ;i++){
-                                    str+=options.charAt(i);
-                                }
-                                i+=4;
-                                String sub = options.substring(i);
-                                T.writeAppend(T,"echo",sub,str);
-                            }else{
-                                T.echo("invalid command!");
+                        break;
+                    case "touch":
+                        String touch ="";
+                        for (int i=0;i<args.length;i++){
+                            touch+=args[i];
+                            if (i!=args.length-1){
+                                touch+=" ";
+                            }else if(i==args.length-1){
+                                break;
                             }
                         }
-                        else {
-                            if(options.contains("pwd")){
-                                String sub = options.substring(6);
-                                T.write(T,"pwd",sub,"");
-                            }
-                            else if(options.contains("ls")){
-                                String sub = options.substring(5);
-                                T.write(T,"ls",sub,"");
-                            }
-                            else if(options.contains("echo")){
-                                options=options.substring(5);
-                                String str="";
-                                int i=0;
-                                for (;options.charAt(i)!='>';i++){
-                                    str+=options.charAt(i);
-                                }
-                                i+=2;
-                                String sub = options.substring(i);
-                                T.write(T,"echo",sub,str);
-                            }else{
-                                T.echo("invalid command!");
+                        System.out.println(touch);
+                        T.touch(touch);
+                        break;
+                    case "cp":
+                        if(args.length!=0 && args[0].equals("-r")){
+                            File f1 = new File(args[1]);
+                            File f2 = new File(args[2]);
+                            T.cpr(f1,f2);
+                        }else{
+                            System.out.println("sssssss");
+                            File f1 = new File(args[0]);
+                            File f2 = new File(args[1]);
+                            T.cp(f1,f2);
+                        }
+                        break;
+                    case "rm":
+                        String rm ="";
+                        for (int i=0;i<args.length;i++){
+                            rm+=args[i];
+                            if (i!=args.length-1){
+                                rm+=" ";
+                            }else if(i==args.length-1){
+                                break;
                             }
                         }
+                        System.out.println(rm);
+                        T.rm(rm);
+                        break;
+                    case "cat":
+                        if(args.length==1){
+                            T.cat(args[0]);
+                        }else if(args.length==2){
+                            T.cat(args[0],args[1]);
+                        }
+                        break;
+                    default:
+                        T.echo("invalid!");
+                        break;
+                }
+            }else{
+                echo("this command incorrect ");
+                echo("list of available commands");
+                echo(parser.help());
+            }
 
-                    }//pwd >> file
-                    //ls >> file
-                    //echo ahmed >> file
-                    //ahmed sayed >> file
-                    else{
-                        T.echo("invalid command!");
-                    }
-
-                    }
+            }
         }
+
+    public static void main(String[] args) throws IOException {
+        Terminal T = new Terminal();
+        T.chooseCommandAction();
     }
 }
