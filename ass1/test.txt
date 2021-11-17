@@ -1,2 +1,13 @@
-asdasjkh 
-asdasjkh
+.idea
+a
+aa
+ahmed
+ahmeds
+ahmedsayed
+assinment1OS.iml
+b
+dirs
+out
+s s
+src
+test.txt

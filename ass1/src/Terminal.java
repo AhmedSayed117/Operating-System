@@ -45,8 +45,6 @@ public class Terminal {
     public void cd(String[] args){
         String p = getPath();
         if((args[0].equals(".."))){
-//            System.out.println(p.length());
-            System.out.println("ss");
             int l = p.length();
             while ((l)>=0){
                 if(p.charAt(l-1)!='\\'){
@@ -57,25 +55,38 @@ public class Terminal {
                     break;
                 }
             }
-            System.out.println(p);
-            setPath(p);//cd..
+            echo(p);
+            setPath(p);//cd ..
         }else{
-            System.out.println("ssaaa");
-             setPath(p+='\\'+args[0]);
-             System.out.println(p);
+            if(args[0].contains(":")){
+                StringBuilder sub = new StringBuilder(Arrays.toString(args));
+                for (int i=0;i<sub.length();i++){
+                    if(sub.indexOf(",")!=-1){
+                        sub.deleteCharAt(sub.indexOf(","));
+                    }
+                }
+                sub = new StringBuilder(sub.substring(1, sub.length() - 1));
+                setPath(sub.toString());
+                echo(sub.toString());
+            }else{
+                StringBuilder sub = new StringBuilder(Arrays.toString(args));
+                for (int i=0;i<sub.length();i++){
+                    if(sub.indexOf(",")!=-1){
+                        sub.deleteCharAt(sub.indexOf(","));
+                    }
+                }
+                sub = new StringBuilder(sub.substring(1, sub.length() - 1));
+                setPath(p+"\\"+sub);
+                echo(p+"\\"+sub);
+            }
+
         }
     }
 
     public String cd(){
-        if(c==0){
             path = "user.dir";
             path = System.getProperty(path);
-            c++;
-        }else{
-            path = getPath();
-        }
         return path;
-//        path = System.getProperty("user.home");
     }
     //تصاعدي
     public String ls(){
@@ -125,10 +136,6 @@ public class Terminal {
 
     public void mkdir(String s) throws IOException {
         //ahmed.txt ahned.cpp ah.pdf
-//        int spaces=0;
-//        for (int i=0;i<s.length();i++){
-//            if (s.charAt(i)==' ')spaces++;
-//        }
         int spaces = countSpaces(s);
         int i=0;
         for (int j=0;j<=spaces;j++){
@@ -150,71 +157,167 @@ public class Terminal {
             if(check){
                  newFile = new File(path+"\\"+sub);
                 if(newFile.createNewFile()){
-//                echo(path+"\\"+sub);
                     echo(sub + " created");
                 }else{
-//                echo(path+"\\"+sub);
                     echo(sub + " is already exist");
                 }
             }else{
-                if (new File(path + "\\" +sub).exists()){
-                    echo(sub +" is already exist");
+                System.out.println(s);
+                if(s.contains(":\\")){
+                    int size = s.length()-1;
+                    StringBuilder temp = new StringBuilder("");
+                    while (s.charAt(size)!='\\'){
+                        temp.append(s.charAt(size));
+                        size--;
+                    }
+                    temp.reverse();
+                    System.out.println(temp);
+                    if (new File(s).exists()){
+                        echo(temp +" is already exist");
+                    }else{
+                        Files.createDirectories(Paths.get(s));
+                        echo(temp + " is created");
+                    }
+
+                }else if(s.contains("\\") && !s.contains(":")){
+                    int l = s.length();
+                    while ((l)>=0){
+                        if(s.charAt(l-1)!='\\'){
+                            s = s.substring(0,(l-1));
+                            l--;
+                        }else {
+                            s = s.substring(0,(l-1));
+                            break;
+                        }
+                    }
+                    echo(s);//path 2
+                    int k =sub.length() - s.length();
+                    String temp ="";
+                    temp+= sub.substring((sub.length()-k)+1);
+                    System.out.println(path +"\\" +s +"\\" +temp);
+                    if (new File(path +"\\" +s +"\\" +temp).exists()){
+                        echo(temp +" is already exist");
+                    }else{
+                        Files.createDirectories(Paths.get(path +"\\" +s +"\\" +temp));
+                        echo(temp + " is created");
+                    }
+
                 }else{
-                    Files.createDirectories(Paths.get(path +"\\"+sub));
-                    echo(sub + " is created");
+                    if (new File(path + "\\" +sub).exists()){
+                        echo(sub +" is already exist");
+                    }else{
+                        Files.createDirectories(Paths.get(path +"\\"+sub));
+                        echo(sub + " is created");
+                    }
                 }
             }
         }
     }
 
     public void rmdir(String s) throws IOException {
-        //rmdir ahmed.txt Sayed.txt
-        int spaces = countSpaces(s);
-        int i=0;
-        for (int j=0;j<=spaces;j++){
-            String sub="";
-            while (s.charAt(i)!=' '){
-                sub+=s.charAt(i);
+        if(s.equals("*")){
+            File f1 = new File(path);
+            File[] list = f1.listFiles();
+            for (int i=0;i<list.length;i++){
+                if (list[i].isDirectory()){
+                    if (list[i].length()==0){
+                        File d = new File(path + "\\"+ list[i].getName());
+                        if (d.delete()){
+                            echo(list[i].getName() + " deleted");
+                        }
+                    }
+                }
+            }
+        }else{
+            //rmdir ahmed.txt Sayed.txt
+            int spaces = countSpaces(s);
+            int i=0;
+            for (int j=0;j<=spaces;j++){
+                String sub="";
+                while (s.charAt(i)!=' '){
+                    sub+=s.charAt(i);
+                    i++;
+                    if(i==s.length())break;
+                }
                 i++;
-                if(i==s.length())break;
-            }
-            i++;
 
-            boolean check = false;
-            for (int k =0;k<sub.length();k++){
-                if (sub.charAt(k)=='.'){
-                    check = true;
-                    break;
+                boolean check = false;
+                for (int k =0;k<sub.length();k++){
+                    if (sub.charAt(k)=='.'){
+                        check = true;
+                        break;
+                    }
                 }
-            }
-            File newFile = null;
-            if(check){
-                newFile = new File(path+"\\"+sub);
-                if(newFile.exists()){
-                    if(newFile.length()==0){
-                        echo(sub + " is Empty not allowed remove it with this command");
+                File newFile = null;
+                if(check){
+                    newFile = new File(path+"\\"+sub);
+                    if(newFile.exists()){
+                        if(newFile.length()==0){
+                            echo(sub + " is Empty not allowed remove it with this command");
+                        }else{
+                            newFile.delete();
+                            echo(sub + " deleted successfully");
+                        }
+                    }
+                }else if(!check){
+                    ////////////////////
+
+                    if(s.contains(":\\")){
+
+                        int size = s.length()-1;
+                        StringBuilder temp = new StringBuilder("");
+                        while (s.charAt(size)!='\\'){
+                            temp.append(s.charAt(size));
+                            size--;
+                        }
+                        temp.reverse();
+                        System.out.println(temp);
+                        File directory = new File(s);
+                        if (new File(s).exists()){
+                            directory.delete();
+                            echo(temp +" deleted successfully");
+                        }else{
+                            echo("no such folder to delete");
+                        }
+
+                    }else if(s.contains("\\") && !s.contains(":")){
+                        int l = s.length();
+                        while ((l)>=0){
+                            if(s.charAt(l-1)!='\\'){
+                                s = s.substring(0,(l-1));
+                                l--;
+                            }else {
+                                s = s.substring(0,(l-1));
+                                break;
+                            }
+                        }
+                        echo(s);//path 2
+                        int k =sub.length() - s.length();
+                        String temp ="";
+                        temp+= sub.substring((sub.length()-k)+1);
+                        System.out.println(path +"\\" +s +"\\" +temp);
+                        File directory = new File(path +"\\" +s +"\\" +temp);
+                        if (new File(path +"\\" +s +"\\" +temp).exists()){
+                            directory.delete();
+                            echo(temp +" deleted successfully");
+                        }else{
+                            echo("no such folder to delete");
+                        }
+
                     }else{
-                        newFile.delete();
-                        echo(sub + " deleted successfully");
+                        File directory = new File(path+"\\"+sub);
+                        if (directory.length()==0){
+                            boolean result = directory.delete();
+                            if(result) {
+                                echo(sub+" is Deleted");
+                            }
+                            else {
+                                echo(sub+" not empty to delete");
+                            }
+                        }
                     }
                 }
-            }else if(!check){
-                File directory = new File(path+"\\"+sub);
-                if (directory.length()==0){
-                    boolean result = directory.delete();
-                    if(result) {
-                        echo(sub+" is Deleted");
-                    }
-                    else {
-                        echo(sub+" not empty to delete");
-                    }
-                }
-
             }
-            else{
-                echo(sub + " not exist!");
-            }
-
         }
 
     }
@@ -337,12 +440,19 @@ public class Terminal {
     }
 
     public void cat(String s1) throws IOException {
-        FileInputStream file = new FileInputStream(path + "\\"+ s1);
-        int i=0;String s="";
-        while ((i=file.read())!=-1){
-            s+=(char)i;
+        File f1 = new File(path + "\\"+ s1);
+        if (f1.exists()){
+            FileInputStream file = new FileInputStream(path + "\\"+ s1);
+            int i=0;String s="";
+            while ((i=file.read())!=-1){
+                s+=(char)i;
+            }
+            file.close();
+            echo(s);
+        }else{
+            echo("not available files");
         }
-        echo(s);
+
     }
 
     public void cat(String s1,String s2) throws IOException {
@@ -469,6 +579,7 @@ public class Terminal {
                         String e = "";
                         for (int i=0;i<args.length;i++){
                             e+=args[i];
+                            e+=" ";
                         }
                         T.echo(e);
                         break;
@@ -521,7 +632,6 @@ public class Terminal {
                                 break;
                             }
                         }
-                        System.out.println(p);
                         T.mkdir(p);
                         break;
                     case "rmdir":

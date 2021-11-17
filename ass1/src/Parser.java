@@ -14,14 +14,11 @@ class Parser {
         help();
         if(foundCommand.contains(options[0]))check=true;
         if(check){
-            System.out.println("here");
             commandName = options[0];
             for (int i=1,k=0;i<options.length;i++,k++){
                 args[k] = options[i];
             }
         }
-        System.out.println(commandName);
-        System.out.println(Arrays.toString(args));
         return check;
     }
 
@@ -35,6 +32,7 @@ class Parser {
         s.add("ls");//
         s.add("ls -r");//
         s.add("mkdir");//
+        s.add("mkdir *");//
         s.add("rmdir");//
         s.add("touch");//
         s.add("cp");//
