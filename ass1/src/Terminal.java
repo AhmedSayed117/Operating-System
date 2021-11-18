@@ -12,7 +12,7 @@ public class Terminal {
     public Terminal(){
         this.path = System.getProperty("user.dir");
     }
-    //1 mark
+
     public String echo(String e){
         if( checkCount2==0 ){
             System.out.println(e);
@@ -21,16 +21,9 @@ public class Terminal {
         checkCount2 = 0;
         return e;
     }
-    //1 mark
-    int c=0;
+
     public String pwd(){
-        if(c==0){
-            path = "user.dir";
-            path = System.getProperty(path);
-            c++;
-        }else{
             path = getPath();
-        }
         return path;
     }
 
@@ -162,7 +155,6 @@ public class Terminal {
                     echo(sub + " is already exist");
                 }
             }else{
-                System.out.println(s);
                 if(s.contains(":\\")){
                     int size = s.length()-1;
                     StringBuilder temp = new StringBuilder("");
@@ -171,14 +163,15 @@ public class Terminal {
                         size--;
                     }
                     temp.reverse();
-                    System.out.println(temp);
+//                    System.out.println(temp);
                     if (new File(s).exists()){
                         echo(temp +" is already exist");
+                        break;
                     }else{
                         Files.createDirectories(Paths.get(s));
                         echo(temp + " is created");
+                        break;
                     }
-
                 }else if(s.contains("\\") && !s.contains(":")){
                     int l = s.length();
                     while ((l)>=0){
@@ -190,24 +183,28 @@ public class Terminal {
                             break;
                         }
                     }
-                    echo(s);//path 2
+//                    echo(s);//path 2
                     int k =sub.length() - s.length();
                     String temp ="";
                     temp+= sub.substring((sub.length()-k)+1);
-                    System.out.println(path +"\\" +s +"\\" +temp);
+//                    System.out.println(path +"\\" +s +"\\" +temp);
                     if (new File(path +"\\" +s +"\\" +temp).exists()){
                         echo(temp +" is already exist");
+                        break;
                     }else{
                         Files.createDirectories(Paths.get(path +"\\" +s +"\\" +temp));
                         echo(temp + " is created");
+                        break;
                     }
 
                 }else{
                     if (new File(path + "\\" +sub).exists()){
                         echo(sub +" is already exist");
+                        break;
                     }else{
                         Files.createDirectories(Paths.get(path +"\\"+sub));
                         echo(sub + " is created");
+                        break;
                     }
                 }
             }
@@ -240,7 +237,6 @@ public class Terminal {
                     if(i==s.length())break;
                 }
                 i++;
-
                 boolean check = false;
                 for (int k =0;k<sub.length();k++){
                     if (sub.charAt(k)=='.'){
@@ -254,16 +250,16 @@ public class Terminal {
                     if(newFile.exists()){
                         if(newFile.length()==0){
                             echo(sub + " is Empty not allowed remove it with this command");
+                            break;
                         }else{
                             newFile.delete();
                             echo(sub + " deleted successfully");
+                            break;
                         }
                     }
                 }else if(!check){
                     ////////////////////
-
                     if(s.contains(":\\")){
-
                         int size = s.length()-1;
                         StringBuilder temp = new StringBuilder("");
                         while (s.charAt(size)!='\\'){
@@ -271,13 +267,15 @@ public class Terminal {
                             size--;
                         }
                         temp.reverse();
-                        System.out.println(temp);
+//                        System.out.println(temp);
                         File directory = new File(s);
                         if (new File(s).exists()){
                             directory.delete();
                             echo(temp +" deleted successfully");
+                            break;
                         }else{
                             echo("no such folder to delete");
+                            break;
                         }
 
                     }else if(s.contains("\\") && !s.contains(":")){
@@ -291,28 +289,31 @@ public class Terminal {
                                 break;
                             }
                         }
-                        echo(s);//path 2
+//                        echo(s);//path 2
                         int k =sub.length() - s.length();
                         String temp ="";
                         temp+= sub.substring((sub.length()-k)+1);
-                        System.out.println(path +"\\" +s +"\\" +temp);
+//                        System.out.println(path +"\\" +s +"\\" +temp);
                         File directory = new File(path +"\\" +s +"\\" +temp);
                         if (new File(path +"\\" +s +"\\" +temp).exists()){
                             directory.delete();
                             echo(temp +" deleted successfully");
+                            break;
                         }else{
                             echo("no such folder to delete");
+                            break;
                         }
-
                     }else{
                         File directory = new File(path+"\\"+sub);
                         if (directory.length()==0){
                             boolean result = directory.delete();
                             if(result) {
                                 echo(sub+" is Deleted");
+                                break;
                             }
                             else {
                                 echo(sub+" not empty to delete");
+                                break;
                             }
                         }
                     }
@@ -356,7 +357,6 @@ public class Terminal {
         else{
             echo("invalid path!");
         }
-
     }
 
     public void cp(File source , File dest) throws IOException {
@@ -382,7 +382,6 @@ public class Terminal {
                 echo(dest + " not exist");
             }
         }
-
     }
 
     int v=0;String shared="";
@@ -552,7 +551,7 @@ public class Terminal {
                     case "echo"://echo ahmed sayed hassan > file
                         if (Arrays.toString(args).contains(">") && args[args.length-2].equals(">")){
                             String sub = "";
-                            System.out.println(args[args.length-2]);
+//                            System.out.println(args[args.length-2]);
                             for (int i=0;i<args.length-2;i++){
                                 sub+=args[i];
                                 if (i!=args.length-3){
@@ -561,7 +560,7 @@ public class Terminal {
                                     break;
                                 }
                             }
-                            System.out.println(sub);
+//                            System.out.println(sub);
                             T.write(T, "echo",args[args.length-1] , sub);
 
                         }else if (Arrays.toString(args).contains(">>") && args[args.length-2].equals(">>")){
@@ -644,7 +643,7 @@ public class Terminal {
                                 break;
                             }
                         }
-                        System.out.println(delete);
+//                        System.out.println(delete);
                         T.rmdir(delete);
                         break;
                     case "touch":
@@ -657,7 +656,7 @@ public class Terminal {
                                 break;
                             }
                         }
-                        System.out.println(touch);
+//                        System.out.println(touch);
                         T.touch(touch);
                         break;
                     case "cp":
@@ -666,7 +665,6 @@ public class Terminal {
                             File f2 = new File(args[2]);
                             T.cpr(f1,f2);
                         }else{
-                            System.out.println("sssssss");
                             File f1 = new File(args[0]);
                             File f2 = new File(args[1]);
                             T.cp(f1,f2);
@@ -682,7 +680,7 @@ public class Terminal {
                                 break;
                             }
                         }
-                        System.out.println(rm);
+//                        System.out.println(rm);
                         T.rm(rm);
                         break;
                     case "cat":

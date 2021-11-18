@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 class Parser {
     String commandName="";
@@ -31,8 +30,8 @@ class Parser {
         s.add("cd ..");//
         s.add("ls");//
         s.add("ls -r");//
-        s.add("mkdir");//
-        s.add("mkdir *");//
+        s.add("mkdir");/////
+        s.add("rmdir *");//
         s.add("rmdir");//
         s.add("touch");//
         s.add("cp");//
